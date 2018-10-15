@@ -30,11 +30,11 @@ for (i in 1:loop) {
   
 
   
-  data10000 <- rnorm(10000,0,1)
+  data10000 <- rnorm(2000,0,1)
   data1000 <- rnorm(1000,0,1)
-  data100 <- rnorm(100,0,1)
-  data10 <- rnorm(10,0,1)
-  data5 <- rnorm(5,0,1)
+  data100 <- rnorm(500,0,1)
+  data10 <- rnorm(250,0,1)
+  data5 <- rnorm(100,0,1)
   
   datalist <- list(data10000,data1000,data100,data10,data5)
   
@@ -106,19 +106,35 @@ se_boot
 se_mle
 se_boot_para
 
-se_mle_sse
-se_sse
-se_boot_sse
-se_boot_para_sse
-
-se_sse-se_mle_sse
-se_boot_sse-se_sse
-se_boot_sse-se_mle_sse
 
 
-datalist[[j]]
-mle_sigma <- sd(datalist[[j]])^2
-var(datalist[[j]])
+
+
+se_mle_sse-se_sse
+se_sse-se_boot_sse
+se_boot_sse-se_boot_para_sse
+
+
+
+df <- data.frame(se_mle_sse,se_sse,se_boot_sse,se_boot_para_sse)
+
+df3 <- normalize(df)
+df4 <- data.frame(x=c(1:5),df)
+
+library(reshape)
+library(ggplot2)
+library(gridExtra)
+df2 <- melt(df4, id=c("x"))
+
+p1 <- ggplot(data = df2[df2$x==1,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
+p2 <- ggplot(data = df2[df2$x==2,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
+p3 <- ggplot(data = df2[df2$x==3,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
+p4 <- ggplot(data = df2[df2$x==4,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
+p5 <- ggplot(data = df2[df2$x==5,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
+
+grid.arrange(p1, p2,p3,p4,p5,ncol=2)
+
+??normalize
 
 
 # exponetial distribution
@@ -185,28 +201,4 @@ se
 se_boot
 se_mle
 
-se_mle_sse-se_sse
-se_sse-se_boot_sse
-se_boot_sse-se_boot_para_sse
-se_boot_para_sse
 
-
-df <- data.frame(se_mle_sse,se_sse,se_boot_sse,se_boot_para_sse)
-
-df3 <- normalize(df)
-df4 <- data.frame(x=c(1:5),df)
-
-library(reshape)
-library(ggplot2)
-library(gridExtra)
-df2 <- melt(df4, id=c("x"))
-
-p1 <- ggplot(data = df2[df2$x==1,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
-p2 <- ggplot(data = df2[df2$x==2,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
-p3 <- ggplot(data = df2[df2$x==3,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
-p4 <- ggplot(data = df2[df2$x==4,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
-p5 <- ggplot(data = df2[df2$x==5,], aes(x=x,y=value)) + geom_point(aes(colour=variable,))
-
-grid.arrange(p1, p2,p3,p4,p5,ncol=2)
-
-??normalize
