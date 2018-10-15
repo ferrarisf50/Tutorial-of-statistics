@@ -5,268 +5,75 @@
 library(MASS)
 library(boot)
 
-sampling_mean_sum <- numeric(5)
-resampling_mean_sum <- numeric(5)
 
+# Estimate the standard error of the mean
+# Compare bootstrap method and standard error estimator
 
-for (i in 1:100) {
-  
-  set.seed(i)
-  data10000 <- rnorm(10000,0,1)
-  data1000 <- rnorm(1000,0,1)
-  data100 <- rnorm(100,0,1)
-  data10 <- rnorm(10,0,1)
-  data5 <- rnorm(5,0,1)
-  
-  datalist <- list(data10000,data1000,data100,data10,data5)
-  
-  sampling_mean <- numeric(5)
-  for (k in 1:5) {
-    sampling_mean[k] <- mean(datalist[[k]], na.rm=TRUE)
-  }
-  sampling_mean_sum=sampling_mean_sum+sampling_mean^2
-
-  
-  resampling_mean <- numeric(5)
-  for (j in 1:5) {
-    set.seed(i)
-    dim <- length(datalist[[j]])*10
-    resampling_mean[j] <- mean(sample(datalist[[j]],dim,replace=T), na.rm=TRUE)
-  }
-  
-  resampling_mean_sum=resampling_mean_sum+resampling_mean^2 
-  
-}
-
-sampling_mean_sum
-resampling_mean_sum
-
-
-
-# exponential distribution
-
-sampling_mean_sum <- numeric(5)
-resampling_mean_sum <- numeric(5)
-
-rate=2
-for (i in 1:100) {
-  
-  set.seed(i)
-  data10000 <- rexp(10000,rate)
-  data1000 <- rexp(1000,rate)
-  data100 <- rexp(100,rate)
-  data10 <- rexp(10,rate)
-  data5 <- rexp(5,rate)
-  
-  datalist <- list(data10000,data1000,data100,data10,data5)
-  
-  sampling_mean <- numeric(5)
-  for (k in 1:5) {
-    sampling_mean[k] <- 1/mean(datalist[[k]], na.rm=TRUE)
-  }
-  sampling_mean_sum=sampling_mean_sum+(sampling_mean-rate)^2
-  
-  
-  resampling_mean <- numeric(5)
-  for (j in 1:5) {
-    set.seed(i)
-    dim <- length(datalist[[j]])*10
-    resampling_mean[j] <- 1/mean(sample(datalist[[j]],dim,replace=T), na.rm=TRUE)
-  }
-  
-  resampling_mean_sum=resampling_mean_sum+(resampling_mean-rate)^2 
-  
-}
-
-
-sampling_mean_sum 
-resampling_mean_sum 
-
-# Estimate the MSE of the standard error estimator of the mean
-
-sampling_mean_sum <- numeric(5)
-resampling_mean_sum <- numeric(5)
-
-
-data <- runif(100)
+B=500
+loop=100
 
 fc <- function(x,i){
   
   return(mean(x[i]))
 }
 
+se_sse <- numeric(5)
+se_boot_sse <- numeric(5)
+se_mle_sse <- numeric(5)
 
-set.seed(1)
-bootmean <- boot(data,statistic = fc,1)
-bootmean
-set.seed(1)
-mean(sample(data,100,replace=T))
-mean(data)
-
-
-for (i in 1:100) {
+for (i in 1:loop) {
   
   set.seed(i)
-  data10000 <- rnorm(10000,0,1)
-  data1000 <- rnorm(1000,0,1)
-  data100 <- rnorm(100,0,1)
-  data10 <- rnorm(10,0,1)
+  data10000 <- rnorm(20,0,1)
+  data1000 <- rnorm(15,0,1)
+  data100 <- rnorm(12,0,1)
+  data10 <- rnorm(8,0,1)
   data5 <- rnorm(5,0,1)
   
   datalist <- list(data10000,data1000,data100,data10,data5)
   
-  sampling_mean <- numeric(5)
+  se_theory <- numeric(5)
   for (k in 1:5) {
-    sampling_mean[k] <- mean(datalist[[k]], na.rm=TRUE)
+    se_theory[k] <- 1/sqrt(length(datalist[[k]]))
+  }  
+  
+  se_mle <- numeric(5)
+  for (k in 1:5) {
+    dim <- length(datalist[[k]])
+    se_mle[k] <- sd(datalist[[k]])*sqrt(dim-1)/dim
+  }  
+  se_mle_sse=se_mle_sse+(se_mle-se_theory)^2
+  
+  se <- numeric(5)
+  for (k in 1:5) {
+    dim <- length(datalist[[k]])
+    se[k] <- sd(datalist[[k]])/sqrt(dim)
   }
-  sampling_mean_sum=sampling_mean_sum+sampling_mean^2
+  se_sse=se_sse+(se-se_theory)^2
   
   
-  resampling_mean <- numeric(5)
+  se_boot <- numeric(5)
   for (j in 1:5) {
     set.seed(i)
-    dim <- length(datalist[[j]])*10
-    resampling_mean[j] <- mean(sample(datalist[[j]],dim,replace=T), na.rm=TRUE)
+    bootmean <- boot(datalist[[j]],statistic = fc,B)
+    se_boot[j] <- sd(bootmean$t)
   }
   
-  resampling_mean_sum=resampling_mean_sum+resampling_mean^2 
+  se_boot_sse=se_boot_sse+(se_boot-se_theory)^2
   
 }
+se_theory
+se
+se_boot
+se_mle
 
-sampling_mean_sum
-resampling_mean_sum
-
-
-=======
-# Estimate of MSE of mean estimator
-
-
-library(MASS)
-library(boot)
-
-sampling_mean_sum <- numeric(5)
-resampling_mean_sum <- numeric(5)
+se_mle_sse
+se_sse
+se_boot_sse
 
 
-for (i in 1:100) {
-  
-  set.seed(i)
-  data10000 <- rnorm(10000,0,1)
-  data1000 <- rnorm(1000,0,1)
-  data100 <- rnorm(100,0,1)
-  data10 <- rnorm(10,0,1)
-  data5 <- rnorm(5,0,1)
-  
-  datalist <- list(data10000,data1000,data100,data10,data5)
-  
-  sampling_mean <- numeric(5)
-  for (k in 1:5) {
-    sampling_mean[k] <- mean(datalist[[k]], na.rm=TRUE)
-  }
-  sampling_mean_sum=sampling_mean_sum+sampling_mean^2
-
-  
-  resampling_mean <- numeric(5)
-  for (j in 1:5) {
-    set.seed(i)
-    dim <- length(datalist[[j]])*10
-    resampling_mean[j] <- mean(sample(datalist[[j]],dim,replace=T), na.rm=TRUE)
-  }
-  
-  resampling_mean_sum=resampling_mean_sum+resampling_mean^2 
-  
-}
-
-sampling_mean_sum
-resampling_mean_sum
-
-
-
-# exponential distribution
-
-sampling_mean_sum <- numeric(5)
-resampling_mean_sum <- numeric(5)
-
-rate=2
-for (i in 1:100) {
-  
-  set.seed(i)
-  data10000 <- rexp(10000,rate)
-  data1000 <- rexp(1000,rate)
-  data100 <- rexp(100,rate)
-  data10 <- rexp(10,rate)
-  data5 <- rexp(5,rate)
-  
-  datalist <- list(data10000,data1000,data100,data10,data5)
-  
-  sampling_mean <- numeric(5)
-  for (k in 1:5) {
-    sampling_mean[k] <- 1/mean(datalist[[k]], na.rm=TRUE)
-  }
-  sampling_mean_sum=sampling_mean_sum+(sampling_mean-rate)^2
-  
-  
-  resampling_mean <- numeric(5)
-  for (j in 1:5) {
-    set.seed(i)
-    dim <- length(datalist[[j]])*10
-    resampling_mean[j] <- 1/mean(sample(datalist[[j]],dim,replace=T), na.rm=TRUE)
-  }
-  
-  resampling_mean_sum=resampling_mean_sum+(resampling_mean-rate)^2 
-  
-}
-
-
-sampling_mean_sum 
-resampling_mean_sum 
-
-# Estimate the MSE of the standard error estimator of the mean
-
-sampling_mean_sum <- numeric(5)
-resampling_mean_sum <- numeric(5)
-
-fc <- function(x,i=1){
-  
-  return(mean(x))
-}
-set.seed(1)
-bootmean <- boot(data100,statistic = fc,1)
-bootmean
-set.seed(1)
-mean(sample(data100,100,replace=T))
-
-for (i in 1:100) {
-  
-  set.seed(i)
-  data10000 <- rnorm(10000,0,1)
-  data1000 <- rnorm(1000,0,1)
-  data100 <- rnorm(100,0,1)
-  data10 <- rnorm(10,0,1)
-  data5 <- rnorm(5,0,1)
-  
-  datalist <- list(data10000,data1000,data100,data10,data5)
-  
-  sampling_mean <- numeric(5)
-  for (k in 1:5) {
-    sampling_mean[k] <- mean(datalist[[k]], na.rm=TRUE)
-  }
-  sampling_mean_sum=sampling_mean_sum+sampling_mean^2
-  
-  
-  resampling_mean <- numeric(5)
-  for (j in 1:5) {
-    set.seed(i)
-    dim <- length(datalist[[j]])*10
-    resampling_mean[j] <- mean(sample(datalist[[j]],dim,replace=T), na.rm=TRUE)
-  }
-  
-  resampling_mean_sum=resampling_mean_sum+resampling_mean^2 
-  
-}
-
-sampling_mean_sum
-resampling_mean_sum
-
+se_sse-se_mle_sse
+se_boot_sse-se_sse
+se_boot_sse-se_mle_sse
 
 >>>>>>> fd4f451f465d4bdabdb1468a10c88e3d0e137db1
