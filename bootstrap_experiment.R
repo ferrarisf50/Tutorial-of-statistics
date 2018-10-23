@@ -9,7 +9,7 @@ library(boot)
 # Estimate the standard error of the mean
 # Compare bootstrap method and standard error estimator
 
-B=500
+B=200
 loop=100
 
 fc <- function(x,i){
